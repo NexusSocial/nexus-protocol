@@ -303,7 +303,7 @@ Then I
 ## License
 
 Unless otherwise specified, this repository is licensed under the
-[BSD 2-Clause Plus Patent License][LICENSE-BSD] (also at https://opensource.org/license/bsdpluspatent/).
+[BSD 2-Clause Plus Patent License](LICENSE-BSD) (also at https://opensource.org/license/bsdpluspatent/).
 This is a permissive, non-viral license that also explicitly protects you from patent trolling.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for
