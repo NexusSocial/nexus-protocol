@@ -301,14 +301,18 @@ Then I
 * [iFire](https://github.com/fire)
 
 ## License
+Unless otherwise specified, all code in this repository is dual-licensed under
+either:
 
-Unless otherwise specified, this repository is licensed under the
-[BSD 2-Clause Plus Patent License](LICENSE-BSD) (also at https://opensource.org/license/bsdpluspatent/).
-This is a permissive, non-viral license that also explicitly protects you from patent trolling.
+- MIT License ([LICENSE-MIT](LICENSE-MIT))
+- BSD 2-Clause Plus Patent License ([LICENSE-BSD](LICENSE-BSD))
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for
-inclusion in the work by you shall be licensed as above, without any additional
-terms or conditions.
+at your option. This means you can select the license you prefer!
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, shall be dual licensed as above, without any
+additional terms or conditions.
+
 
 [ActivityPub]: https://www.w3.org/TR/activitypub/
 [Matrix]: https://spec.matrix.org/latest/
