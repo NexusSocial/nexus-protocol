@@ -81,25 +81,6 @@ invested in a game that uses Nexus, and might be a paid or free service. The
 servers set their own access policies for clients, rate limiting, etc. We might
 add this into the spec to have a standardized way of doing this.
 
-
-### UUIDs
-A [Universally Unique Identifier][UUID](UUID) is a 128-bit random number that we
-use to represent a user's ID. Every user has their own `uuid`.
-
-In reality, a user's identity is actually based on the full list of past and
-present `did`s, but using that can be practically inconvenient in many
-situations. Therefore, we use the `uuid` as it does not need to change when a
-user switches their `did`.
-
-*TODO*: This is incorrect. The assumption that there are no collisions is not
-guaranteed, so we need to handle the case where they collide. Also, we cannot
-assume that generating UUIDs is random - I could copy someone else's UUID and
-try to use that as my own when creating a new account. So we need to think of a
-better way. Luckily we can always fall back to the historical DID list. Edit:
-What historical DID list? I don't think that exists in the version we were
-originally describing, except in the thing that the user saves to the
-homeserver. Is that an issue?
-
 ### Decentralized Identifiers (DID)
 
 [Decentralized Identifiers][did] are a way of representing in a global namespace
@@ -151,6 +132,7 @@ happens when `did:web` changes its referenced key? Wont validating the message
 fail?
 
 ### Leaking IP addresses
+
 Unlike a regular peer to peer network, a federated network allows clients to
 avoid communicating directly with other clients. This means clients only have to
 reveal their ip address to their own homeserver, but not to other random users.
@@ -161,30 +143,6 @@ the data at the link, their ip address would be leaked.
 To mitigate this, users might be able to request that their homeservers download
 linked documents on their behalf, so the user never directly connects to those
 resources.
-
-### DID migration
-
-Any modification to the user's current set of DIDs must signed with one of their
-current DIDs. Likewise, users receiving a notification that one of their friends
-modified their DID(s) must validate that the message was signed with the
-previous DID.
-
-Each user stores a persistent map somewhere of each of their friend's UUIDs to
-their last known homeserver and set of DIDs:
-
-```
-Bob UUID -> (Bob homeserver, {Bob DID1, Bob DID2})
-Alice UUID -> (Alice homeserver, {Alice DID1})
-```
-
-They may choose to store this locally on disk or encrypted and signed on their
-homeserver. If they choose to store it on their homeserver, any modification to
-this map will immediately be known by the user and that user should decide to
-migrate homeservers for safety.
-
-Whenever a client encounters a valid DID migration message, the client updates
-their local map, uploads it to the homeserver, and then acknowledges the receipt
-of the message.
 
 ### Message validation
 
