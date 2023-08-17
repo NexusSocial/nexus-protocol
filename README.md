@@ -1,73 +1,43 @@
 # Nexus Protocol
 
-An open source federated messaging protocol.
+An open source federated messaging protocol, with a focus on encryption,
+self-soverign identity, privacy, and ability to migrate homeservers.
 
-We believe that this social protocol is the first step to enable a new
-generation of federated applications, with users able to change homeservers,
-cryptographic keys, and applications while bringing their friends and data with
-them.
+Messages are arbitrary payloads - they can be arbitrary information. Common use
+cases include user's current social VR lobby, their current user bio, their
+avatar, direct messsages, microblogging - its up to what you as a developer want
+to support.
 
-It was also designed so that users have privacy and most importantly, the
-ability to change their homeservers and their cryptographic keys.
-
-
-Because the messages are just arbitrary JSON payloads, it should be general
-enough to be used for basically anything. They could be information about the
-user's current lobby and how to connect, their current user bio, their avatar,
-direct messsages - ultimately its entirely dependent on what you as a game
-developer want to support. You can even tell users "hey, talk to me using this
-other entirely different protocol that is specific to my game", using the Nexus
-protocol merely to coordinate that handoff (likely to be very common when
-joining a multiplayer lobby, for example).
-
-We will separately provide a set of JSON schemas useful for Social VR games,
-that you may choose to use to improve your game's interoperability with other
-games. Use what you want, discard what you dont.
+You can even tell users "hey, talk to me using this other entirely different
+protocol that is specific to my game", using the Nexus protocol merely to
+coordinate that handoff (likely to be very common when joining a multiplayer
+lobby in video games, for example).
 
 ## Why use this over a centralized system?
 
-We believe that developers are well intentioned, but often make decisions that
-hurt users and communities. Games often run out of money and shutdown (EchoVR),
-impose bad policies (VRChat's EAC), or just never become popular due to the
-powerful impact of network effects inhibiting adoption.
+Apps and games often run out of money and shutdown, or just never become popular
+due to the powerful impact of network effects inhibiting adoption.
 
 By using a federated system instead of a centralized one, users can self-host
-their own servers (reducing costs for developers), can migrate *away* from games
-with bad policies (IF those games have open source protocols and clients), and
-seamlessly engage in social interactions across different games. The
+servers (reducing costs for developers), access new apps with low friction,
+and seamlessly engage in social interactions across different apps. The
 interoperability will lead to a dilution of the aforementioned network effects,
-helping smaller indie or open source games, and also improve users ability to
-migrate between ecosystems.
+helping smaller indie or open source games and apps, and also improve users
+ability to migrate between ecosystems.
 
 ## Feature List
 
-The basic features in the MVP are:
-* Create an account/identity
-* Add friends (if you know their homeserver or they send you a link to their
-  profile)
-* Remove friends
-* Send messages to friends (push based messaging)
-* Add additional public keys as well as remove old ones
-* Change your homeserver
-* Modify your public keys (need at least one to sign messages or allow receiving
-  encrypted messages)
-
-Some features probably not in the MVP but that we definitely want for the final
-version:
-* Query for friends last known status (pull based messaging)
-* Send messages to "the public" or "all friends"
-* All messages should be signed if the user has public keys
-* Send an encrypted "private message" which means a message that only a
- particular user can read
-* Homeservers can store some data for users, which acts as metadata about their
-  friends. This metadata is bounded by the number of friends the user has, and
-  homeservers can set limits on a user's total number of friends to avoid
-  exceeding storage and network capacities.
+The basic features in Nexus are:
+* Create an account/identity that you can prove you own
+* Migrate identity to new keys and new hosts
+* Migrate your homeserver
+* Automatically listen for homeserver migrations of people you know
+* Send and receive messages to others
+* End-to-end encryption
+* Sign messages
 
 ### What is not in scope
 
-* Followers and Followees. All relationships between users are bidirectional for
-  simplicity.
 * A concept of "avatars", "lobbies", etc. This information is to be represented
   by the application-specific schemas for the message payloads. We will be
   providing separate JSON schemas that developers can adopt for ineroperable
@@ -311,6 +281,76 @@ a user, you send
 
 Then I
 
+--------------------------
+## Layer Descriptions
+The protocol is split into several layers:
+![A diagram of the layered architecture](layers.png)
+
+### DID Messaging Layer
+
+At this layer, the server is essentially just a relay + queue of HTTP requests.
+
+Client:
+* Client polls its homeserver via HTTP to receive messages.
+* Client sends messages to `(DID, protocol, homeserver)`s by mapping the
+  tuple to an HTTP endpoint, and making an HTTP request.
+* Responsible for converting DID Message format to a HTTP Request
+
+Server:
+* Outbound and inbound message queues.
+* Successfully sending messages to other homeservers pops them from outbound.
+* Successfully responding to a poll from client pops them from inbound.
+* Messages can timeout.
+* Outbound messages will be sent with exponential backoff.
+* Outbound messages sent via HTTP request
+* Inbound messages sent as response to HTTP request from client.
+
+### DID Integrity Layer
+
+Responsible for encrypting, decrypting, signing, and verifying messages. Handles
+DID chain migration.
+
+TODO: This is all no-ops for now. We figured it out already but will document
+and implement it soon.
+
+### DID Location Layer
+
+Responsible for keeping track of the homeserver of other DIDs an application protocol cares about.
+
+Client
+* Send our homeserver migration notification to a set of `(DID, protocol)`s.
+* Send `(DID, protocol)` messages.
+* Add a known user at `(DID, protocol, homeserver)` to local list and also to
+  homeserver.
+
+Server:
+* Check for receipt of
+* Stores the map of `DID -> protocol -> homeserver`
+* Ta
+* Maps `(DID, protocol)` to/from `(DID, protocol, homeserver)`
+
+### Application Layer
+
+This is whatever you want. Often, friend requests, follow/follows,
+specific message types, etc go here.
+
+## Protocols at the Application Layer
+
+There are many possible protocols at the Application Layer. However, we will be
+explaining one in particular that is likely to be very useful - the Discovery
+Protocol.
+
+### Discovery Protocol
+
+Provides a way of asking a single homeserver for the full list of tuples of
+`(protocol, homeserver)` for a given DID. This is for convenience - you only
+need to remember the discovery protocol homeserver for a given DID to learn all
+of the homeservers for its other protocols.
+
+Security note: Relying on this is good for convenience, but means that if a
+client migrates its discovery homeserver, it should keep a cache of
+`DID -> protocol -> homeserver` to notify those DIDs of the migration via the
+DID Location Layer.
 
 ## Collaborators
 
