@@ -250,8 +250,14 @@ At this layer, the server is essentially just a relay + queue of HTTP requests.
 
 Client:
 * Client polls its homeserver via HTTP to receive messages.
+* Client can send two different kinds of messages to it's homeserver
+  Global-Message: `(DID, protocol, homeserver, payload) -> (http-endpoint, payload)`
+  Local-Message:  `(protocol, payload) -> (http-endpoint, payload)`
 * Client sends messages to `(DID, protocol, homeserver)`s by mapping the
   tuple to an HTTP endpoint, and making an HTTP request.
+* Alternatively Client maps a message of `(protocol)` to an HTTP
+  endpoint of it's own server, and making an HTTP request that
+  gets interpreted by it's homeserver.
 * Responsible for converting DID Message format to a HTTP Request
 
 Server:
@@ -277,14 +283,15 @@ Responsible for keeping track of the homeserver of other DIDs an application pro
 
 Client
 * Send our homeserver migration notification to a set of `(DID, protocol)`s.
-* Send `(DID, protocol)` messages.
-* Add a known user at `(DID, protocol, homeserver)` to local list and also to
-  homeserver.
+* Send Global-Message `(DID, protocol)` messages.
+* Local-Message: Add a known user at `(DID, protocol, homeserver)` to local list and also to
+  homeserver through a local message.
 
 Server:
 * Check for receipt of
 * Stores the map of `DID -> protocol -> homeserver`
-* Ta
+* Interpret a Local-Message of protocol `location` to be the third bullet point in Client
+  and to add the known user to it's local list.
 * Maps `(DID, protocol)` to/from `(DID, protocol, homeserver)`
 
 ### Application Layer
